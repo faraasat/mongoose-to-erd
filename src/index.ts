@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import mongoose from "mongoose";
 
 import { SchemaStructure, ModelInfo, Relations } from "./types";

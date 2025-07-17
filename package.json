@@ -6,25 +6,22 @@
     "type": "git",
     "url": "git+https://github.com/faraasat/mongoose-to-erd.git"
   },
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "require": "./dist/cjs/index.js",
-      "import": "./dist/esm/index.js"
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
     }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "release": "standard-version"
   },
   "files": [
     "dist"
   ],
-  "scripts": {
-    "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc --project tsconfig.cjs.json",
-    "build:esm": "tsc --project tsconfig.esm.json",
-    "release": "standard-version"
-  },
   "keywords": [
     "mongoose",
     "mongoose to erd",
@@ -44,6 +41,7 @@
   "devDependencies": {
     "@types/node": ">=18.0.0",
     "standard-version": "^9.5.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.4.0"
   },
   "publishConfig": {
