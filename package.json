@@ -37,12 +37,12 @@
   "author": "Farasat Ali <63093876+faraasat@users.noreply.github.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@terrastruct/d2": ">=0.1.21",
     "mongoose": ">=5.2.9"
   },
   "devDependencies": {
     "@types/node": ">=18.0.0",
     "standard-version": "^9.5.0",
+    "@terrastruct/d2": ">=0.1.21",
     "typescript": "^5.4.0"
   },
   "publishConfig": {
