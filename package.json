@@ -6,11 +6,11 @@
     "type": "git",
     "url": "git+https://github.com/faraasat/mongoose-to-erd.git"
   },
-  "main": "dist/index.cjs",
+  "main": "dist/index.js",
   "module": "dist/index.mjs",
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
+      "require": "./dist/index.js",
       "import": "./dist/index.mjs"
     }
   },
