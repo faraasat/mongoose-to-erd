@@ -1,6 +1,6 @@
 {
   "name": "mongoose-to-erd",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Convert your mongoose schema to Entity Relationship Diagram Easily",
   "repository": {
     "type": "git",

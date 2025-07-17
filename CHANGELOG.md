@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 1.0.14 (2025-07-17)
+
+
+### Bug Fixes
+
+* import issue ([9d29964](https://github.com/faraasat/mongoose-to-erd/commit/9d299642604c762c2fdd1e21aab151bfa3ad1862))
+
 ### 1.0.13 (2025-07-17)
 
 ### 1.0.12 (2025-07-17)
