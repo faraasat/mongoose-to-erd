@@ -1,18 +1,25 @@
 {
   "name": "mongoose-to-erd",
   "version": "1.0.3",
-  "description": "A powerful react search based on pagefind with beautiful UI",
+  "description": "Convert your mongoose schema to Entity Relationship Diagram Easily",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/faraasat/mongoose-to-erd.git"
   },
-  "type": "module",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./dist/*.css": "./dist/*.css"
+  },
   "files": [
     "dist"
   ],
-  "bin": {
-    "generate-erd": "dist/index.js"
-  },
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.cjs.json",
@@ -40,6 +47,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  }
 }
