@@ -12,10 +12,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    },
-    "./dist/*.css": "./dist/*.css"
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js"
+    }
   },
   "files": [
     "dist"
