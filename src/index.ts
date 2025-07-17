@@ -29,7 +29,7 @@ const insertIntoStructure = (
   }
 
   if (rest.length === 0) {
-    const options = {
+    const options: SchemaStructure["options"] = {
       required: schemaType.options?.required || false,
       unique: schemaType.options?.unique || false,
     };
@@ -91,7 +91,7 @@ const buildStructure = (
 ): SchemaStructure | undefined => {
   if (!schemaType) return;
 
-  const options = {
+  const options: SchemaStructure["options"] = {
     required: schemaType.options?.required || false,
     unique: schemaType.options?.unique || false,
   };
@@ -169,7 +169,7 @@ const addRelations = (refs: Array<Relations>) => {
 
 const erdStructure = (
   name: string,
-  structure: Array<SchemaStructure>,
+  structure: Array<SchemaStructure> | undefined | null,
   allErds: Array<string>
 ) => {
   if (!structure || structure?.length == 0) return;
@@ -220,7 +220,7 @@ const buildErd = (models: ModelInfo[]) => {
   let finalErd = "";
 
   models.forEach(({ name, structure, methods }) => {
-    const allErds = [];
+    const allErds: Array<string> = [];
     erdStructure(name, structure, allErds);
 
     allErds[0] = allErds[0].substring(0, allErds[0].lastIndexOf("}\n"));
