@@ -1,16 +1,14 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "target": "ES5",
-    "lib": ["DOM", "ESNext"],
-    "module": "NodeNext",
+    "target": "ES2022",
+    "module": "ESNext",
     "jsx": "react",
     "declaration": true,
     "declarationDir": "./dist",
     "esModuleInterop": true,
-    "moduleResolution": "NodeNext",
-    "allowSyntheticDefaultImports": true,
-    "strict": true
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
