@@ -48,62 +48,29 @@ minimal-erd-<timestamp>.svg
 
 ## 🛠️ Usage
 
-### 1. Setup your models
-
 ```ts
 import { mongooseToErdMain } from "mongoose-to-erd";
+
+// all options are optional
+const options = {
+  sketch: true,
+  forceAppendix: false,
+  scale: 0.5,
+  center: true,
+  pad: 100,
+};
 
 mongoose.connect("<your-mongodb-url>").then(async () => {
   await mongooseToErdMain(
     mongoose.modelNames(),
     mongoose.model.bind(mongoose),
-    false
+    options // this is optional
   );
   mongoose.disconnect();
 });
 ```
 
 This will generate two ERD diagrams in SVG format, reflecting your full schema and its minimal structure.
-
----
-
-## 📘 Example
-
-Given the following Mongoose schema:
-
-```ts
-const CommentSchema = new Schema({
-  content: String,
-  author: { type: Schema.Types.ObjectId, ref: "User" },
-});
-
-const PostSchema = new Schema({
-  title: String,
-  body: String,
-  comments: [CommentSchema],
-  createdBy: { type: Schema.Types.ObjectId, ref: "User" },
-});
-```
-
-The tool generates:
-
-✅ A full ERD with:
-
-- All field names and types
-- Embedded `Comment` schemas inside `Post`
-- `createdBy` and `author` as foreign keys to `User`
-- Metadata like method names
-
-✅ A minimal ERD with:
-
-- Boxes for `User`, `Post`, and `Comment`
-- Arrows from `Post` → `User`, `Comment` → `User`
-
-## 📌 Requirements
-
-- Node.js 18+
-- Mongoose v6+
-- [@terrastruct/d2](https://www.npmjs.com/package/@terrastruct/d2)
 
 ---
 
@@ -114,14 +81,6 @@ The tool generates:
 3. Maps schema types into a structured object tree
 4. Converts this structure into D2 markup
 5. Renders diagrams using the D2 engine
-
----
-
-## 💡 Tips
-
-- Ensure all models are registered via `mongoose.model(...)` before calling `mongooseToErdMain`.
-- Use `.bind(mongoose)` when passing the model getter for type safety.
-- Open SVGs in your browser, Figma, or VS Code for preview.
 
 ---
 

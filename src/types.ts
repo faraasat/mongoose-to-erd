@@ -16,3 +16,11 @@ export interface Relations {
   from: string;
   relation: "one-to-one" | "one-to-many";
 }
+
+export interface MOptions {
+  sketch?: boolean;
+  forceAppendix?: boolean;
+  scale?: number;
+  center?: boolean;
+  pad?: number;
+}

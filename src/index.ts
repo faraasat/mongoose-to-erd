@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { SchemaStructure, ModelInfo, Relations } from "./types";
+import { SchemaStructure, ModelInfo, Relations, MOptions } from "./types";
 
 const primitive = ["String", "Boolean", "Date", "ObjectID", "Number"];
 const nonPrimitive = {
@@ -242,7 +242,7 @@ const buildErd = (models: ModelInfo[]) => {
   return finalErd;
 };
 
-const renderErd = async (erd: string, saveName: string) => {
+const renderErd = async (erd: string, saveName: string, options?: MOptions) => {
   const { D2 } = await import("@terrastruct/d2");
   const fs = await import("node:fs");
 
@@ -251,11 +251,11 @@ const renderErd = async (erd: string, saveName: string) => {
   const result = await d2.compile(erd, {
     options: {
       layout: "elk",
-      sketch: false,
-      forceAppendix: true,
-      scale: 1,
-      center: true,
-      pad: 20,
+      sketch: options?.sketch,
+      forceAppendix: options?.forceAppendix,
+      scale: options?.scale,
+      center: options?.center,
+      pad: options?.pad ? options.pad : 20,
     },
     inputPath: "",
   });
@@ -267,12 +267,20 @@ const renderErd = async (erd: string, saveName: string) => {
   fs.writeFileSync(saveName, svg);
 };
 
-const renderFullErd = async (models: ModelInfo[], isoDate: string) => {
+const renderFullErd = async (
+  models: ModelInfo[],
+  isoDate: string,
+  options?: MOptions
+) => {
   const erd = buildErd(models);
-  await renderErd(erd, `full-erd-${isoDate}.svg`);
+  await renderErd(erd, `full-erd-${isoDate}.svg`, options);
 };
 
-const renderMinimalErd = async (models: ModelInfo[], isoDate: string) => {
+const renderMinimalErd = async (
+  models: ModelInfo[],
+  isoDate: string,
+  options?: MOptions
+) => {
   let erd = "";
 
   for (const m of models) {
@@ -287,20 +295,21 @@ const renderMinimalErd = async (models: ModelInfo[], isoDate: string) => {
     }
   }
 
-  await renderErd(erd, `minimal-erd-${isoDate}.svg`);
+  await renderErd(erd, `minimal-erd-${isoDate}.svg`, options);
 };
 
 export const mongooseToErdMain = async (
   modelNames: Array<string>,
-  mongooseModel: typeof mongoose.model
+  mongooseModel: typeof mongoose.model,
+  options?: MOptions
 ) => {
   try {
     console.log(`Generating Schema...`);
     const data = getAllModelDefinitions(modelNames, mongooseModel);
     const isoDate = new Date().toISOString();
     await Promise.all([
-      renderMinimalErd(data, isoDate),
-      renderFullErd(data, isoDate),
+      renderMinimalErd(data, isoDate, options),
+      renderFullErd(data, isoDate, options),
     ]);
   } catch (err) {
     console.log(err);
