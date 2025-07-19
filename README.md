@@ -4,6 +4,21 @@
 
 Supports full schema traversal, embedded documents, arrays, and model relationships — exported beautifully as SVG using [@terrastruct/d2](https://github.com/terrastruct/d2).
 
+![npm version](https://img.shields.io/npm/v/mongoose-to-erd.svg)
+![package size minified](https://img.shields.io/bundlephobia/min/mongoose-to-erd?style=plastic)
+[![](https://data.jsdelivr.com/v1/package/npm/mongoose-to-erd/badge)](https://www.jsdelivr.com/package/npm/mongoose-to-erd)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
+![total downloads](https://img.shields.io/npm/dt/mongoose-to-erd.svg)
+![total downloads per year](https://img.shields.io/npm/dy/mongoose-to-erd.svg)
+![total downloads per week](https://img.shields.io/npm/dw/mongoose-to-erd.svg)
+![total downloads per month](https://img.shields.io/npm/dm/mongoose-to-erd.svg)
+
+[download-image]: https://img.shields.io/npm/dm/mongoose-to-erd.svg
+[download-url]: https://npmjs.org/package/mongoose-to-erd
+
+[![mongoose-to-erd](https://nodei.co/npm/mongoose-to-erd.png)](https://npmjs.org/package/mongoose-to-erd)
+
 ---
 
 ## 📦 Installation
