@@ -6,6 +6,9 @@
     "type": "git",
     "url": "git+https://github.com/faraasat/mongoose-to-erd.git"
   },
+  "engines": {
+    "node": ">=16"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "exports": {
@@ -16,7 +19,7 @@
   },
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && rm -rf *.d.mts",
     "release": "standard-version"
   },
   "files": [
