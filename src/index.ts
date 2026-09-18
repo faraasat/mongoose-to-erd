@@ -2,7 +2,26 @@ import mongoose from "mongoose";
 
 import { SchemaStructure, ModelInfo, Relations, MOptions } from "./types";
 
-const primitive = ["String", "Boolean", "Date", "ObjectID", "Number"];
+const primitive = [
+  "String",
+  "Boolean",
+  "Date",
+  "ObjectId",
+  "Number",
+  "Decimal128",
+  "BigInt",
+  "UUID",
+  "Buffer",
+  "Map",
+];
+
+/**
+ * Mongoose has spelled the ObjectId instance differently across majors
+ * ("ObjectID" before v6, "ObjectId" from v6 on), so match case-insensitively
+ * rather than against one exact spelling.
+ */
+const isPrimitive = (type: string) =>
+  primitive.some((p) => p.toLowerCase() === type.toLowerCase());
 const nonPrimitive = {
   Array: "Array",
   Embedded: "Embedded",
@@ -118,7 +137,7 @@ const buildStructure = (
   return structure;
 };
 
-const getAllModelDefinitions = (
+export const getAllModelDefinitions = (
   modelNames: Array<string>,
   mongooseModel: typeof mongoose.model
 ): ModelInfo[] => {
@@ -154,8 +173,6 @@ const getAllModelDefinitions = (
   return result;
 };
 
-const refList: Array<Relations> = [];
-
 const addRelations = (refs: Array<Relations>) => {
   let rel = "";
 
@@ -169,15 +186,21 @@ const addRelations = (refs: Array<Relations>) => {
 const erdStructure = (
   name: string,
   structure: Array<SchemaStructure> | undefined | null,
-  allErds: Array<string>
+  allErds: Array<string>,
+  refList: Array<Relations>
 ) => {
   if (!structure || structure?.length == 0) return;
 
   let erd = "";
   erd += `${name}: {\nshape: sql_table\n`;
 
+  // Reserve this table's slot up front. Recursive calls below append their own
+  // tables, so without the reservation the parent would end up after them.
+  const selfIndex = allErds.length;
+  allErds.push("");
+
   structure.forEach((s) => {
-    if (primitive.includes(s.type)) {
+    if (isPrimitive(s.type)) {
       erd += `${s.name}: ${s.type}`;
       if (s.options.unique) {
         erd += ` {constraint: unique}`;
@@ -204,23 +227,28 @@ const erdStructure = (
         relation:
           s.type == nonPrimitive.Embedded ? "one-to-one" : "one-to-many",
       });
-      erdStructure(new_name, s?.children, allErds);
+      erdStructure(new_name, s?.children, allErds, refList);
     }
   });
 
   erd += "}\n";
 
-  allErds.push(erd);
+  allErds[selfIndex] = erd;
 
   return allErds;
 };
 
-const buildErd = (models: ModelInfo[]) => {
+export const buildErd = (models: ModelInfo[]) => {
   let finalErd = "";
+
+  // Scoped per call. When this lived at module scope the second diagram of a
+  // run inherited the first one's edges, and every subsequent call to
+  // mongooseToErdMain accumulated them further.
+  const refList: Array<Relations> = [];
 
   models.forEach(({ name, structure, methods }) => {
     const allErds: Array<string> = [];
-    erdStructure(name, structure, allErds);
+    erdStructure(name, structure, allErds, refList);
 
     allErds[0] = allErds[0].substring(0, allErds[0].lastIndexOf("}\n"));
 
@@ -315,3 +343,10 @@ export const mongooseToErdMain = async (
     console.log(err);
   }
 };
+
+export type {
+  SchemaStructure,
+  ModelInfo,
+  Relations,
+  MOptions,
+} from "./types";
