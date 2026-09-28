@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="mongoose-to-erd">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#04150d" stop-opacity="1"/><stop offset="100%" stop-color="#0a2418"/></linearGradient>
+    <linearGradient id="txt" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a7f3d0"/></linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%"><stop offset="0%" stop-color="#10b981" stop-opacity=".32"/><stop offset="100%" stop-color="#10b981" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="320" rx="24" fill="url(#bg)"/>
+  <circle cx="1000" cy="160" r="240" fill="url(#glow)"/>
+  <g transform="translate(76 90)" stroke="#10b981" stroke-width="5" fill="none">
+    <rect x="0" y="0" width="72" height="50" rx="7"/>
+    <rect x="0" y="90" width="72" height="50" rx="7"/>
+    <rect x="96" y="45" width="72" height="50" rx="7"/>
+    <path d="M72 25 H84 V70 H96" stroke-linecap="round"/>
+    <path d="M72 115 H84 V70 H96" stroke-linecap="round"/>
+  </g>
+  <text x="280" y="152" font-family="ui-sans-serif,-apple-system,Segoe UI,Inter,Helvetica,Arial" font-size="54" font-weight="800" fill="url(#txt)">mongoose-to-erd</text>
+  <text x="280" y="198" font-family="ui-sans-serif,-apple-system,Segoe UI,Inter,Helvetica,Arial" font-size="25" fill="#86d9b4">Turn Mongoose schemas into entity-relationship diagrams</text>
+  <text x="280" y="240" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="19" fill="#5fa383">npm i mongoose-to-erd</text>
+</svg>

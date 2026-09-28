@@ -2,29 +2,6 @@
   "name": "mongoose-to-erd",
   "version": "1.0.17",
   "description": "Convert your mongoose schema to Entity Relationship Diagram Easily",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/faraasat/mongoose-to-erd.git"
-  },
-  "engines": {
-    "node": ">=16"
-  },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "exports": {
-    ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
-    }
-  },
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsup && rm -rf *.d.mts",
-    "release": "standard-version"
-  },
-  "files": [
-    "dist"
-  ],
   "keywords": [
     "mongoose",
     "mongoose to erd",
@@ -33,21 +10,71 @@
     "database",
     "mongodb"
   ],
-  "author": "Farasat Ali <63093876+faraasat@users.noreply.github.com>",
+  "homepage": "https://github.com/faraasat/mongoose-to-erd#readme",
+  "bugs": {
+    "url": "https://github.com/faraasat/mongoose-to-erd/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faraasat/mongoose-to-erd.git"
+  },
   "license": "MIT",
-  "dependencies": {
-    "@terrastruct/d2": "^0.1.21"
+  "author": "Farasat Ali <63093876+faraasat@users.noreply.github.com>",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/faraasat"
+  },
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "release": "standard-version",
+    "prepublishOnly": "npm run typecheck && npm run test -- --run && npm run build"
   },
   "peerDependencies": {
     "mongoose": ">=5.2.9"
   },
+  "dependencies": {
+    "@terrastruct/d2": "^0.1.21"
+  },
   "devDependencies": {
-    "@types/node": ">=18.0.0",
+    "@types/node": "^24.3.0",
     "standard-version": "^9.5.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "mongoose": "^8.18.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

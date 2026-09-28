@@ -1,105 +1,210 @@
-# 🧩 mongoose-to-erd
+<p align="center">
+  <img src="https://raw.githubusercontent.com/faraasat/mongoose-to-erd/main/.github/assets/banner.svg" alt="mongoose-to-erd" width="100%" />
+</p>
 
-**Generate Entity-Relationship Diagrams (ERDs) from your Mongoose models, instantly.**
+<p align="center">
+  Turn your Mongoose schemas into entity-relationship diagrams, automatically.
+</p>
 
-Supports full schema traversal, embedded documents, arrays, and model relationships — exported beautifully as SVG using [@terrastruct/d2](https://github.com/terrastruct/d2).
+<p align="center">
+  <a href="https://www.npmjs.com/package/mongoose-to-erd"><img alt="npm version" src="https://img.shields.io/npm/v/mongoose-to-erd?color=cb3837&label=npm&logo=npm"></a>
+  <a href="https://www.npmjs.com/package/mongoose-to-erd"><img alt="downloads" src="https://img.shields.io/npm/dm/mongoose-to-erd?color=cb3837&label=downloads"></a>
+  <a href="https://bundlephobia.com/package/mongoose-to-erd"><img alt="bundle size" src="https://img.shields.io/bundlephobia/minzip/mongoose-to-erd?label=minzipped"></a>
+  <a href="https://github.com/faraasat/mongoose-to-erd/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/faraasat/mongoose-to-erd/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="types" src="https://img.shields.io/badge/types-included-3178c6?logo=typescript&logoColor=white">
+  <a href="https://github.com/faraasat/mongoose-to-erd/blob/main/LICENSE"><img alt="license" src="https://img.shields.io/npm/l/mongoose-to-erd?color=blue"></a>
+</p>
 
-![npm version](https://img.shields.io/npm/v/mongoose-to-erd.svg)
-![package size minified](https://img.shields.io/bundlephobia/min/mongoose-to-erd?style=plastic)
-[![](https://data.jsdelivr.com/v1/package/npm/mongoose-to-erd/badge)](https://www.jsdelivr.com/package/npm/mongoose-to-erd)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-
-![total downloads](https://img.shields.io/npm/dt/mongoose-to-erd.svg)
-![total downloads per year](https://img.shields.io/npm/dy/mongoose-to-erd.svg)
-![total downloads per week](https://img.shields.io/npm/dw/mongoose-to-erd.svg)
-![total downloads per month](https://img.shields.io/npm/dm/mongoose-to-erd.svg)
-
-[download-image]: https://img.shields.io/npm/dm/mongoose-to-erd.svg
-[download-url]: https://npmjs.org/package/mongoose-to-erd
-
-[![mongoose-to-erd](https://nodei.co/npm/mongoose-to-erd.png)](https://npmjs.org/package/mongoose-to-erd)
+<p align="center">
+  <a href="https://www.npmjs.com/package/mongoose-to-erd">npm</a> ·
+  <a href="https://github.com/faraasat/mongoose-to-erd/blob/main/CHANGELOG.md">Changelog</a> ·
+  <a href="https://github.com/faraasat/mongoose-to-erd/issues">Issues</a>
+</p>
 
 ---
 
-## 📦 Installation
+## Why
+
+Your schema *is* your data model, but it lives across a dozen files. This reads
+your registered Mongoose models and renders them as SVG entity-relationship
+diagrams via [D2](https://d2lang.com) — including primary keys, foreign keys,
+unique constraints, embedded documents, arrays, and instance/static methods.
+
+## Installation
 
 ```bash
-npm install mongoose-to-erd --save-dev
-# or
-yarn add mongoose-to-erd -D
-# or
-pnpm install mongoose-to-erd --save-dev
-# or
-bun add --development mongoose-to-erd
+npm install mongoose-to-erd
 ```
 
----
+<details>
+<summary>yarn / pnpm / bun</summary>
 
-## 🧠 Features
-
-- ✅ Extracts and visualizes all paths and nested schemas in your Mongoose models
-- 🔄 Resolves references (`ref`) into foreign key relationships
-- 🧱 Distinguishes between primitives, arrays, and embedded schemas
-- 🔍 Adds instance/static methods to ERD as metadata
-- 🧾 Generates two diagram types:
-
-  - **Minimal ERD** – only model names and references
-  - **Full ERD** – includes schema fields, types, constraints, and methods
-
-- 📄 Outputs clean `.svg` files compatible with browsers and documentation tools
-
----
-
-## 📂 Output
-
-Two `.svg` diagrams are generated in the project root:
-
-```txt
-full-erd-<timestamp>.svg
-minimal-erd-<timestamp>.svg
+```bash
+yarn add mongoose-to-erd
+pnpm add mongoose-to-erd
+bun add mongoose-to-erd
 ```
+</details>
 
----
+**Peer dependency:** `mongoose >= 5.2.9`. Requires Node 18+.
 
-## 🛠️ Usage
+## Quick start
+
+Register your models first, then hand their names to the generator:
 
 ```ts
+import mongoose from "mongoose";
 import { mongooseToErdMain } from "mongoose-to-erd";
 
-// all options are optional
-const options = {
-  sketch: true,
-  forceAppendix: false,
-  scale: 0.5,
-  center: true,
-  pad: 100,
-};
+import "./models/user";
+import "./models/post";
 
-mongoose.connect("<your-mongodb-url>").then(async () => {
-  await mongooseToErdMain(
-    mongoose.modelNames(),
-    mongoose.model.bind(mongoose),
-    options // this is optional
-  );
-  mongoose.disconnect();
+const { files } = await mongooseToErdMain(["User", "Post"], mongoose.model);
+console.log(files); // { full: "…/full-erd-….svg", minimal: "…/minimal-erd-….svg" }
+```
+
+This writes two SVGs:
+
+| File | Contents |
+| --- | --- |
+| `full-erd-<timestamp>.svg` | Every field, constraint and method |
+| `minimal-erd-<timestamp>.svg` | Entities and their relationships only |
+
+No database connection is needed — the schemas are read straight from
+Mongoose's registry.
+
+## Without touching the filesystem
+
+`generateErd` returns the D2 source and rendered SVG so you can post-process,
+diff, embed or serve them yourself:
+
+```ts
+import { generateErd } from "mongoose-to-erd";
+
+const erd = await generateErd(["User", "Post"], mongoose.model);
+
+erd.full.svg;      // rendered SVG string
+erd.full.d2;       // the generated D2 source
+erd.minimal.svg;
+erd.models;        // the extracted schema definitions
+```
+
+Handy for committing a diagram in CI and failing when it drifts:
+
+```ts
+const { full } = await generateErd(modelNames, mongoose.model);
+if (full.d2 !== readFileSync("docs/schema.d2", "utf8")) {
+  throw new Error("Schema changed — regenerate docs/schema.d2");
+}
+```
+
+## Building the pieces yourself
+
+```ts
+import { getAllModelDefinitions, buildErd, buildMinimalErd } from "mongoose-to-erd";
+
+const models = getAllModelDefinitions(["User", "Post"], mongoose.model);
+const d2Source = buildErd(models);        // full
+const overview = buildMinimalErd(models); // entities + edges only
+```
+
+`getAllModelDefinitions` returns a typed description of each model:
+
+```ts
+interface ModelInfo {
+  name: string;
+  structure: SchemaStructure[];  // fields, nested children, options
+  methods: Record<string, string[]>;
+}
+```
+
+## Options
+
+### Rendering
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `layout` | `"elk" \| "dagre"` | `"elk"` | D2 layout engine. |
+| `sketch` | `boolean` | `false` | Hand-drawn rendering style. |
+| `themeId` | `number` | — | D2 theme id. |
+| `scale` | `number` | — | Output scale factor. |
+| `pad` | `number` | `20` | Padding around the diagram, in px. |
+| `center` | `boolean` | — | Centre the diagram in the viewport. |
+| `forceAppendix` | `boolean` | — | Force D2 to render an appendix. |
+
+### Output
+
+Only used by `mongooseToErdMain`.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `outDir` | `string` | `process.cwd()` | Directory to write into. Created if missing. |
+| `fullFileName` | `string` | `full-erd-<timestamp>` | Base name (no extension). |
+| `minimalFileName` | `string` | `minimal-erd-<timestamp>` | Base name (no extension). |
+| `timestamp` | `boolean` | `true` | Append a timestamp to the default names. |
+
+```ts
+await mongooseToErdMain(["User", "Post"], mongoose.model, {
+  outDir: "docs/diagrams",
+  timestamp: false,   // stable names, so the files can be committed
+  sketch: true,
+  pad: 50,
 });
 ```
 
-This will generate two ERD diagrams in SVG format, reflecting your full schema and its minimal structure.
+## Errors
 
----
+`mongooseToErdMain` **rejects** on failure rather than swallowing the error.
+Earlier versions caught everything and logged it, so a failed run looked
+identical to a successful one:
 
-## 🧠 How It Works
+```ts
+try {
+  await mongooseToErdMain(names, mongoose.model);
+} catch (err) {
+  process.exitCode = 1;
+}
+```
 
-1. Parses your registered Mongoose models
-2. Recursively walks through all paths including sub-schemas
-3. Maps schema types into a structured object tree
-4. Converts this structure into D2 markup
-5. Renders diagrams using the D2 engine
+## What gets mapped
 
----
+| Mongoose | Diagram |
+| --- | --- |
+| `_id` | Primary key constraint |
+| `{ type: ObjectId, ref: "Other" }` | Foreign key constraint + relationship edge |
+| `{ unique: true }` | Unique constraint |
+| Embedded object | Nested table, one-to-one edge |
+| Array of subdocuments | Nested table, one-to-many edge |
+| `schema.methods` | `name(): instanceMethod` |
+| `schema.statics` | `name(): staticMethod` |
 
-## 🧑‍🎓 Credits
+## Notes
 
-Developed with ❤️ by **[Farasat Ali](https://github.com/faraasat)**
-Feedback and contributions welcome!
+- Models must be **registered** with Mongoose before you call this; the
+  generator resolves them by name through the `mongoose.model` function you
+  pass in. No database connection is needed.
+- Diagrams are rendered by `@terrastruct/d2`, which is bundled as a dependency.
+
+## Contributing
+
+Issues and pull requests are welcome.
+
+```bash
+git clone https://github.com/faraasat/mongoose-to-erd.git
+cd mongoose-to-erd
+npm install
+npm test          # vitest
+npm run typecheck # tsc --noEmit
+npm run build     # tsup
+```
+
+Releases are manual — nothing publishes on a push to `main`. Maintainers run
+the **Release** workflow from the Actions tab.
+
+## Privacy
+
+The published package contains **no telemetry**.
+
+## License
+
+[MIT](./LICENSE) © [Farasat Ali](https://github.com/faraasat)
