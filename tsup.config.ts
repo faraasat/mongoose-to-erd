@@ -9,7 +9,8 @@ export default defineConfig({
   target: "node18",
   external: ["mongoose", "@terrastruct/d2"],
   splitting: false,
-  minify: false,
+  // Minified: keeps the install footprint small.
+  minify: true,
 
   // Sourcemaps are deliberately not published: they were ~65% of the install
   // footprint, and this build is already readable.
