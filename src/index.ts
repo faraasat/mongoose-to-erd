@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
-import { SchemaStructure, ModelInfo, Relations, MOptions } from "./types";
+import {
+  SchemaStructure,
+  ModelInfo,
+  Relations,
+  MOptions,
+  ErdOutput,
+} from "./types";
 
 const primitive = [
   "String",
@@ -265,56 +271,45 @@ export const buildErd = (models: ModelInfo[]) => {
 
   finalErd += addRelations(refList);
 
-  finalErd = finalErd.replaceAll("label", "_label");
+  // `label` is a reserved D2 keyword: a field called `label` would set the
+  // table's label instead of declaring a column. Escape it — but only where
+  // it is actually used as a key.
+  //
+  // This used to be a blunt `replaceAll("label", "_label")`, which also
+  // mangled `labelled`, `sublabel`, and any model named `Label`.
+  finalErd = finalErd.replace(/^(\s*)label(\s*:)/gm, "$1_label$2");
 
   return finalErd;
 };
 
-const renderErd = async (erd: string, saveName: string, options?: MOptions) => {
+/** Compiles D2 source to an SVG string. */
+const renderErd = async (erd: string, options?: MOptions): Promise<string> => {
   const { D2 } = await import("@terrastruct/d2");
-  const fs = await import("node:fs");
 
   const d2 = new D2();
 
   const result = await d2.compile(erd, {
     options: {
-      layout: "elk",
+      layout: options?.layout ?? "elk",
       sketch: options?.sketch,
       forceAppendix: options?.forceAppendix,
       scale: options?.scale,
       center: options?.center,
-      pad: options?.pad ? options.pad : 20,
+      pad: options?.pad ?? 20,
+      themeID: options?.themeId,
     },
     inputPath: "",
   });
 
-  const svg = await d2.render(result.diagram, {
-    ...result.renderOptions,
-  });
-
-  fs.writeFileSync(saveName, svg);
+  return d2.render(result.diagram, { ...result.renderOptions });
 };
 
-const renderFullErd = async (
-  models: ModelInfo[],
-  isoDate: string,
-  options?: MOptions
-) => {
-  const erd = buildErd(models);
-  await renderErd(erd, `full-erd-${isoDate}.svg`, options);
-};
-
-const renderMinimalErd = async (
-  models: ModelInfo[],
-  isoDate: string,
-  options?: MOptions
-) => {
+/** Builds the minimal (entities + relationships only) D2 source. */
+export const buildMinimalErd = (models: ModelInfo[]): string => {
   let erd = "";
 
   for (const m of models) {
-    erd += `\n\n${m.name}: {
-      shape: sql_table
-    }\n\n`;
+    erd += `\n\n${m.name}: {\n  shape: sql_table\n}\n\n`;
 
     for (const s of m.structure) {
       if (s.options?.ref) {
@@ -323,25 +318,72 @@ const renderMinimalErd = async (
     }
   }
 
-  await renderErd(erd, `minimal-erd-${isoDate}.svg`, options);
+  return erd;
 };
 
+/**
+ * Builds both diagrams and returns their D2 source and rendered SVG.
+ *
+ * Nothing is written to disk — use this when you want to post-process, diff,
+ * embed or serve the output yourself.
+ */
+export const generateErd = async (
+  modelNames: Array<string>,
+  mongooseModel: typeof mongoose.model,
+  options?: MOptions
+): Promise<ErdOutput> => {
+  const models = getAllModelDefinitions(modelNames, mongooseModel);
+
+  const fullSource = buildErd(models);
+  const minimalSource = buildMinimalErd(models);
+
+  const [full, minimal] = await Promise.all([
+    renderErd(fullSource, options),
+    renderErd(minimalSource, options),
+  ]);
+
+  return {
+    models,
+    full: { d2: fullSource, svg: full },
+    minimal: { d2: minimalSource, svg: minimal },
+  };
+};
+
+/**
+ * Builds both diagrams and writes them to disk.
+ *
+ * Returns the same payload as {@link generateErd}, plus the paths written.
+ */
 export const mongooseToErdMain = async (
   modelNames: Array<string>,
   mongooseModel: typeof mongoose.model,
   options?: MOptions
-) => {
-  try {
-    console.log(`Generating Schema...`);
-    const data = getAllModelDefinitions(modelNames, mongooseModel);
-    const isoDate = new Date().toISOString();
-    await Promise.all([
-      renderMinimalErd(data, isoDate, options),
-      renderFullErd(data, isoDate, options),
-    ]);
-  } catch (err) {
-    console.log(err);
-  }
+): Promise<ErdOutput & { files: { full: string; minimal: string } }> => {
+  const { writeFile, mkdir } = await import("node:fs/promises");
+  const path = await import("node:path");
+
+  const outDir = options?.outDir ?? process.cwd();
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const suffix = options?.timestamp === false ? "" : `-${stamp}`;
+
+  const output = await generateErd(modelNames, mongooseModel, options);
+
+  await mkdir(outDir, { recursive: true });
+
+  const files = {
+    full: path.join(outDir, `${options?.fullFileName ?? `full-erd${suffix}`}.svg`),
+    minimal: path.join(
+      outDir,
+      `${options?.minimalFileName ?? `minimal-erd${suffix}`}.svg`
+    ),
+  };
+
+  await Promise.all([
+    writeFile(files.full, output.full.svg, "utf8"),
+    writeFile(files.minimal, output.minimal.svg, "utf8"),
+  ]);
+
+  return { ...output, files };
 };
 
 export type {
@@ -349,4 +391,6 @@ export type {
   ModelInfo,
   Relations,
   MOptions,
+  ErdOutput,
+  ErdDiagram,
 } from "./types";

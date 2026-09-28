@@ -10,7 +10,10 @@ export default defineConfig({
   external: ["mongoose", "@terrastruct/d2"],
   splitting: false,
   minify: false,
-  sourcemap: true,
+
+  // Sourcemaps are deliberately not published: they were ~65% of the install
+  // footprint, and this build is already readable.
+  sourcemap: false,
   shims: false,
   // NOTE: no `banner` here. This package has no `bin` entry, so the previous
   // `#!/usr/bin/env node` shebang was being written into dist/index.js and

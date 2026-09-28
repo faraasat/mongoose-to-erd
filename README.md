@@ -59,47 +59,53 @@ import { mongooseToErdMain } from "mongoose-to-erd";
 import "./models/user";
 import "./models/post";
 
-await mongooseToErdMain(["User", "Post"], mongoose.model);
+const { files } = await mongooseToErdMain(["User", "Post"], mongoose.model);
+console.log(files); // { full: "…/full-erd-….svg", minimal: "…/minimal-erd-….svg" }
 ```
 
-This writes two SVGs to the working directory:
+This writes two SVGs:
 
 | File | Contents |
 | --- | --- |
-| `full-erd-<iso-date>.svg` | Every field, constraint and method |
-| `minimal-erd-<iso-date>.svg` | Entities and their relationships only |
+| `full-erd-<timestamp>.svg` | Every field, constraint and method |
+| `minimal-erd-<timestamp>.svg` | Entities and their relationships only |
 
-## Options
+No database connection is needed — the schemas are read straight from
+Mongoose's registry.
+
+## Without touching the filesystem
+
+`generateErd` returns the D2 source and rendered SVG so you can post-process,
+diff, embed or serve them yourself:
 
 ```ts
-await mongooseToErdMain(["User", "Post"], mongoose.model, {
-  sketch: true,
-  scale: 1.5,
-  pad: 50,
-  center: true,
-});
+import { generateErd } from "mongoose-to-erd";
+
+const erd = await generateErd(["User", "Post"], mongoose.model);
+
+erd.full.svg;      // rendered SVG string
+erd.full.d2;       // the generated D2 source
+erd.minimal.svg;
+erd.models;        // the extracted schema definitions
 ```
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `sketch` | `boolean` | `false` | Hand-drawn rendering style. |
-| `scale` | `number` | — | Output scale factor. |
-| `pad` | `number` | — | Padding around the diagram, in pixels. |
-| `center` | `boolean` | — | Centre the diagram in the viewport. |
-| `forceAppendix` | `boolean` | — | Force D2 to render an appendix. |
-
-## Building the diagram yourself
-
-The extraction and D2-generation steps are exported separately, so you can
-render, post-process or diff the output instead of writing files:
+Handy for committing a diagram in CI and failing when it drifts:
 
 ```ts
-import { getAllModelDefinitions, buildErd } from "mongoose-to-erd";
+const { full } = await generateErd(modelNames, mongoose.model);
+if (full.d2 !== readFileSync("docs/schema.d2", "utf8")) {
+  throw new Error("Schema changed — regenerate docs/schema.d2");
+}
+```
+
+## Building the pieces yourself
+
+```ts
+import { getAllModelDefinitions, buildErd, buildMinimalErd } from "mongoose-to-erd";
 
 const models = getAllModelDefinitions(["User", "Post"], mongoose.model);
-const d2Source = buildErd(models);
-
-console.log(d2Source); // valid D2, ready for the d2 CLI or @terrastruct/d2
+const d2Source = buildErd(models);        // full
+const overview = buildMinimalErd(models); // entities + edges only
 ```
 
 `getAllModelDefinitions` returns a typed description of each model:
@@ -109,6 +115,54 @@ interface ModelInfo {
   name: string;
   structure: SchemaStructure[];  // fields, nested children, options
   methods: Record<string, string[]>;
+}
+```
+
+## Options
+
+### Rendering
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `layout` | `"elk" \| "dagre"` | `"elk"` | D2 layout engine. |
+| `sketch` | `boolean` | `false` | Hand-drawn rendering style. |
+| `themeId` | `number` | — | D2 theme id. |
+| `scale` | `number` | — | Output scale factor. |
+| `pad` | `number` | `20` | Padding around the diagram, in px. |
+| `center` | `boolean` | — | Centre the diagram in the viewport. |
+| `forceAppendix` | `boolean` | — | Force D2 to render an appendix. |
+
+### Output
+
+Only used by `mongooseToErdMain`.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `outDir` | `string` | `process.cwd()` | Directory to write into. Created if missing. |
+| `fullFileName` | `string` | `full-erd-<timestamp>` | Base name (no extension). |
+| `minimalFileName` | `string` | `minimal-erd-<timestamp>` | Base name (no extension). |
+| `timestamp` | `boolean` | `true` | Append a timestamp to the default names. |
+
+```ts
+await mongooseToErdMain(["User", "Post"], mongoose.model, {
+  outDir: "docs/diagrams",
+  timestamp: false,   // stable names, so the files can be committed
+  sketch: true,
+  pad: 50,
+});
+```
+
+## Errors
+
+`mongooseToErdMain` **rejects** on failure rather than swallowing the error.
+Earlier versions caught everything and logged it, so a failed run looked
+identical to a successful one:
+
+```ts
+try {
+  await mongooseToErdMain(names, mongoose.model);
+} catch (err) {
+  process.exitCode = 1;
 }
 ```
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import mongoose from "mongoose";
-import { getAllModelDefinitions, buildErd } from "../src";
+import { getAllModelDefinitions, buildErd, buildMinimalErd } from "../src";
 
 const makeModels = () => {
   const conn = new mongoose.Mongoose();
@@ -99,5 +99,53 @@ describe("buildErd", () => {
     const second = buildErd(defs);
     const count = (s: string) => s.split("Post.author -> User").length - 1;
     expect(count(second)).toBe(count(first));
+  });
+});
+
+describe("buildMinimalErd", () => {
+  it("emits one table per model", () => {
+    const { conn } = makeModels();
+    const erd = buildMinimalErd(getAllModelDefinitions(["User", "Post"], conn.model.bind(conn)));
+    expect(erd).toContain("User: {");
+    expect(erd).toContain("Post: {");
+  });
+
+  it("draws only relationship edges, not columns", () => {
+    const { conn } = makeModels();
+    const erd = buildMinimalErd(getAllModelDefinitions(["Post"], conn.model.bind(conn)));
+    expect(erd).toContain("Post -> User");
+    expect(erd).not.toContain("constraint:");
+  });
+});
+
+describe("reserved keyword escaping", () => {
+  const withLabels = () => {
+    const conn = new mongoose.Mongoose();
+    conn.model(
+      "Tag",
+      new conn.Schema({
+        label: { type: String },
+        labelled: { type: Boolean },
+        sublabel: { type: String },
+      })
+    );
+    return conn;
+  };
+
+  it("escapes a field literally named `label`", () => {
+    const conn = withLabels();
+    const erd = buildErd(getAllModelDefinitions(["Tag"], conn.model.bind(conn)));
+    expect(erd).toContain("_label:");
+  });
+
+  // Regression: this used to be a blunt replaceAll("label", "_label"), which
+  // also mangled any identifier merely containing the word.
+  it("leaves fields that merely contain `label` alone", () => {
+    const conn = withLabels();
+    const erd = buildErd(getAllModelDefinitions(["Tag"], conn.model.bind(conn)));
+    expect(erd).toContain("labelled:");
+    expect(erd).toContain("sublabel:");
+    expect(erd).not.toContain("_labelled");
+    expect(erd).not.toContain("sub_label");
   });
 });
