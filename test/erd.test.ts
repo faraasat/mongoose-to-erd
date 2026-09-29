@@ -149,3 +149,57 @@ describe("reserved keyword escaping", () => {
     expect(erd).not.toContain("sub_label");
   });
 });
+
+describe("d2 output formatting", () => {
+  const withNesting = () => {
+    const conn = new mongoose.Mongoose();
+    conn.model(
+      "User",
+      new conn.Schema({
+        email: { type: String, unique: true },
+        roles: [String],
+        profile: { bio: String, avatarUrl: String },
+      })
+    );
+    return conn;
+  };
+
+  // Regression: the non-primitive branch never appended a newline, so an
+  // Array or Embedded field ran into the next one ("roles: Arrayprofile: …")
+  // and D2 parsed the result as a single malformed field.
+  it("puts every field on its own line", () => {
+    const conn = withNesting();
+    const erd = buildErd(getAllModelDefinitions(["User"], conn.model.bind(conn)));
+
+    expect(erd).toContain("roles: Array\n");
+    expect(erd).toContain("profile: Embedded\n");
+    expect(erd).not.toMatch(/Array\w/);
+    expect(erd).not.toMatch(/Embedded\w/);
+  });
+
+  it("emits one field per line throughout the table body", () => {
+    const conn = withNesting();
+    const erd = buildErd(getAllModelDefinitions(["User"], conn.model.bind(conn)));
+    const body = erd.slice(erd.indexOf("shape: sql_table") + 16, erd.indexOf("}"));
+
+    for (const line of body.split("\n").filter(Boolean)) {
+      // Exactly one "name: Type" pair per line.
+      expect(line.match(/:/g)?.length ?? 0).toBeLessThanOrEqual(2);
+    }
+  });
+
+  // Regression: nested tables were named with Math.random(), so regenerating
+  // the same schema produced different D2 every time and a committed diagram
+  // could never be diffed or checked for drift.
+  it("is deterministic across runs", () => {
+    const conn = withNesting();
+    const defs = getAllModelDefinitions(["User"], conn.model.bind(conn));
+    expect(buildErd(defs)).toBe(buildErd(defs));
+  });
+
+  it("derives nested table names from the path", () => {
+    const conn = withNesting();
+    const erd = buildErd(getAllModelDefinitions(["User"], conn.model.bind(conn)));
+    expect(erd).toContain("User_profile");
+  });
+});

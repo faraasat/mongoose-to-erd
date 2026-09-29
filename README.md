@@ -16,6 +16,7 @@
 </p>
 
 <p align="center">
+  <a href="https://faraasat.github.io/mongoose-to-erd/"><b>Live demo</b></a> ·
   <a href="https://www.npmjs.com/package/mongoose-to-erd">npm</a> ·
   <a href="https://github.com/faraasat/mongoose-to-erd/blob/main/CHANGELOG.md">Changelog</a> ·
   <a href="https://github.com/faraasat/mongoose-to-erd/issues">Issues</a>
@@ -198,12 +199,23 @@ npm run typecheck # tsc --noEmit
 npm run build     # tsup
 ```
 
+To run the demo site against your local build:
+
+```bash
+npm run example:dev
+```
+
+The demo generates its diagrams at build time by calling this package for
+real, so what the page shows is genuine output rather than a mock-up.
+
 Releases are manual — nothing publishes on a push to `main`. Maintainers run
 the **Release** workflow from the Actions tab.
 
 ## Privacy
 
-The published package contains **no telemetry**.
+The published package contains **no telemetry**. The demo site at
+[faraasat.github.io/mongoose-to-erd](https://faraasat.github.io/mongoose-to-erd/)
+uses Google Analytics and Aptabase; the library itself never phones home.
 
 ## License
 

@@ -222,11 +222,18 @@ const erdStructure = (
       }
       erd += `\n`;
     } else {
-      const id = Math.random()
-        .toString(36)
-        .substring(2, 6 + 2);
-      const new_name = `${s.name}_${id}`;
-      erd += `${s.name}: ${s.type}`;
+      // Derived from the path rather than Math.random(): the parent name is
+      // already unique, so this stays collision-free while making the output
+      // deterministic. Random suffixes meant regenerating the same schema
+      // produced different D2 every time, so a committed diagram could never
+      // be diffed or checked for drift in CI.
+      const new_name = `${name}_${s.name}`;
+
+      // The trailing newline was missing here, so an Array or Embedded field
+      // ran straight into the next one ("roles: Arrayprofile: Embedded...")
+      // and D2 parsed the result as a single malformed field.
+      erd += `${s.name}: ${s.type}\n`;
+
       refList.push({
         from: `${name}.${s.name}`,
         to: new_name,
