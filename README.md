@@ -24,6 +24,35 @@
 
 ---
 
+## Upgrading from 1.x
+
+`2.0.0` adds a filesystem-free API and output control, and fixes the schema
+mapping. `mongooseToErdMain(names, mongoose.model, options)` keeps its
+signature, but three things differ.
+
+| Change | Impact | What to do |
+| --- | --- | --- |
+| **Failures now reject** | 1.x caught everything and logged it, so a failed run looked identical to a successful one | Wrap in `try/catch` if you were relying on it never throwing |
+| **Timestamps use `-` instead of `:`** | Output is `full-erd-2026-09-29T10-15-00-000Z.svg`; colons are not valid in Windows filenames | Use `timestamp: false` with `fullFileName` for stable, committable names |
+| **The diagram itself changed** | `_id` and `ref` fields are now recognised, so primary keys, foreign keys and relationship edges appear where they previously did not | Regenerate; the new output is correct |
+
+That last one was a genuine bug: the type check looked for `"ObjectID"` while
+Mongoose reports `"ObjectId"`, so on any modern Mongoose **every** `_id` and
+every `ref` was misclassified.
+
+Two further output fixes: `Array` and `Embedded` fields were emitted without a
+trailing newline (running into the next field), and nested tables were named
+with `Math.random()` — so regenerating the same schema produced different D2
+every time. Output is now deterministic and can be committed and diffed.
+
+### New, optional
+
+```ts
+const erd = await generateErd(names, mongoose.model);
+erd.full.svg;   // nothing written to disk
+erd.full.d2;
+```
+
 ## Why
 
 Your schema *is* your data model, but it lives across a dozen files. This reads
