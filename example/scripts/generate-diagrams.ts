@@ -5,6 +5,11 @@
  * renders through D2. Rather than fake that in the browser, the demo runs the
  * actual generator here and ships the resulting SVG and D2 source as static
  * assets — so what you see on the page is genuine output, not a mock-up.
+ *
+ * The result is committed rather than regenerated on every build. D2 renders
+ * through WebAssembly, which is slow enough on CI runners to stall the job,
+ * and the generator's output is deterministic, so a committed file is stable.
+ * Run `npm run generate` to refresh it after changing the schema below.
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";

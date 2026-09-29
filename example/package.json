@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "generate": "node --experimental-strip-types scripts/generate-diagrams.ts",
-    "dev": "npm run generate && next dev",
-    "build": "npm run generate && next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start"
   },
   "dependencies": {
