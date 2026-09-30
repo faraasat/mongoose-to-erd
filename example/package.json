@@ -9,9 +9,10 @@
     "start": "next start"
   },
   "dependencies": {
-    "mongoose-to-erd": "file:..",
     "@aptabase/web": "^0.4.3",
+    "mongoose-to-erd": "file:..",
     "next": "^15.5.0",
+    "prism-react-renderer": "^2.4.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
