@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Hero } from "@/components/hero";
 import { Footer } from "@/components/footer";
+import { Code } from "@/components/code";
 import { track } from "@/components/analytics";
 import {
   source,
@@ -64,7 +65,7 @@ export default function Home() {
         </p>
 
         {showD2 ? (
-          <pre tabIndex={0}>{d2}</pre>
+          <Code language="tsx">{d2}</Code>
         ) : (
           <div
             className="erd"
@@ -80,7 +81,7 @@ export default function Home() {
           Four models with unique constraints, references, arrays of
           subdocuments, embedded objects, and instance/static methods.
         </p>
-        <pre tabIndex={0}>{source}</pre>
+        <Code language="tsx">{source}</Code>
       </section>
 
       <section className="card">
@@ -107,7 +108,7 @@ export default function Home() {
 
       <section className="card">
         <h2>Usage</h2>
-        <pre tabIndex={0}>{`import mongoose from "mongoose";
+        <Code language="tsx">{`import mongoose from "mongoose";
 import { mongooseToErdMain } from "mongoose-to-erd";
 
 import "./models/user";
@@ -117,7 +118,7 @@ const { files } = await mongooseToErdMain(
   ["User", "Post"],
   mongoose.model,
   { outDir: "docs/diagrams", timestamp: false }
-);`}</pre>
+);`}</Code>
       </section>
 
       <section className="card">
@@ -126,11 +127,11 @@ const { files } = await mongooseToErdMain(
           <code>generateErd()</code> hands back the SVG and D2 source so you can
           embed, diff or serve them — which is exactly how this page is built.
         </p>
-        <pre tabIndex={0}>{`const erd = await generateErd(names, mongoose.model);
+        <Code language="tsx">{`const erd = await generateErd(names, mongoose.model);
 
 erd.full.svg;     // rendered SVG string
 erd.full.d2;      // the generated D2 source
-erd.models;       // the extracted schema definitions`}</pre>
+erd.models;       // the extracted schema definitions`}</Code>
       </section>
 
       <section className="card">
@@ -139,11 +140,11 @@ erd.models;       // the extracted schema definitions`}</pre>
           The D2 output is deterministic, so a committed diagram can be checked
           for drift on every build.
         </p>
-        <pre tabIndex={0}>{`const { full } = await generateErd(names, mongoose.model);
+        <Code language="tsx">{`const { full } = await generateErd(names, mongoose.model);
 
 if (full.d2 !== readFileSync("docs/schema.d2", "utf8")) {
   throw new Error("Schema changed — regenerate docs/schema.d2");
-}`}</pre>
+}`}</Code>
       </section>
 
       <Footer />
